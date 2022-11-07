@@ -3,6 +3,18 @@ kind: Pod
 metadata:
   name: nginx-app
 spec:
+  volumes:
+    - name: socket
+      emptyDir: {}
+    - name: dolapo
+      persistentVolumeClaim:
+        claimName: my-pvc
+    - name: test
+      secret:
+        secretName: my-secret
+    - name: configmap
+      configMap:
+        name: app-settings
   containers:
   - name: nginx-app
     image: nginx:alpine
@@ -12,3 +24,19 @@ spec:
         cpu: "500m"
     ports:
       - containerPort: 80
+    volumeMounts:
+      - name: socket
+        mountPath: /usr/share/nginx/socket
+      - name: dolapo
+        mountPath: /dolapo
+      - name: test
+        mountPath: /etc/config
+    env: 
+    - name: NAME
+      valueFrom:
+        configMapKeyRef:
+          name: app-settings
+          key: name
+    envFrom:
+      - configMapRef:
+          name: app-settings
